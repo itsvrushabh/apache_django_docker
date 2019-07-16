@@ -1,12 +1,49 @@
-version: '3.7'
 services:
-    webserver:
-      build: .
-      ports:
-        - 80:80
-      volumes:
-        - ./base_site:/var/www/base_site
-        - ./apache_django.conf:/etc/apache2/sites-available/000-default.conf
-        - ./startup.sh:/var/www/startup.sh
-      command: server
-
+  memcached:
+    environment:
+      MEMCACHED_CACHE_SIZE: '128'
+    image: bitnami/memcached:latest
+    ports:
+    - published: 11211
+      target: 11211
+  mysql:
+    environment:
+      MYSQL_DATABASE: app1_db
+      MYSQL_PASSWORD: cisco123
+      MYSQL_ROOT_PASSWORD: Cisco@123
+      MYSQL_USER: cisco
+      DEBUG: 'false'
+    image: mysql:latest
+    ports:
+    - published: 33060
+      target: 3306
+    restart: always
+    volumes:
+    - db_data:/var/lib/mysql:rw
+  postgres:
+    container_name: my_postgres
+    environment:
+      DB_NAME: app1_db
+      DB_PASS: cisco123
+      DB_USER: cisco
+      DEBUG: 'false'
+    image: postgres:latest
+    ports:
+    - published: 54320
+      target: 5432
+    volumes:
+    - db_data:/var/lib/postgresql/data:rw
+  webserver:
+    build:
+      context: /home/killmonger/workspace/git_code/apache_django_docker
+    command: server
+    ports:
+    - published: 80
+      target: 80
+    volumes:
+    - /home/killmonger/workspace/git_code/apache_django_docker/base_site:/var/www/base_site:rw
+    - /home/killmonger/workspace/git_code/apache_django_docker/apache_django.conf:/etc/apache2/sites-available/000-default.conf:rw
+    - /home/killmonger/workspace/git_code/apache_django_docker/startup.sh:/var/www/startup.sh:rw
+version: '3.7'
+volumes:
+  db_data: {}
