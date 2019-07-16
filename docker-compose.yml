@@ -2,7 +2,7 @@ services:
   memcached:
     environment:
       MEMCACHED_CACHE_SIZE: '128'
-    image: bitnami/memcached:latest
+    image: memcached:latest
     ports:
     - published: 11211
       target: 11211
@@ -19,7 +19,7 @@ services:
       target: 3306
     restart: always
     volumes:
-    - db_data:/var/lib/mysql:rw
+    - db_data:/var/lib/mysql
   postgres:
     container_name: my_postgres
     environment:
@@ -32,18 +32,19 @@ services:
     - published: 54320
       target: 5432
     volumes:
-    - db_data:/var/lib/postgresql/data:rw
-  webserver:
+    - db_data:/var/lib/postgresql/data
+  apache2:
     build:
-      context: /home/killmonger/workspace/git_code/apache_django_docker
+      context: .
     command: server
+    image: apache2:latest
     ports:
     - published: 80
       target: 80
     volumes:
-    - /home/killmonger/workspace/git_code/apache_django_docker/base_site:/var/www/base_site:rw
-    - /home/killmonger/workspace/git_code/apache_django_docker/apache_django.conf:/etc/apache2/sites-available/000-default.conf:rw
-    - /home/killmonger/workspace/git_code/apache_django_docker/startup.sh:/var/www/startup.sh:rw
+    - ./base_site:/var/www/base_site:rw
+    - ./apache_django.conf:/etc/apache2/sites-available/000-default.conf:rw
+    - ./startup.sh:/var/www/startup.sh:rw
 version: '3.7'
 volumes:
   db_data: {}
